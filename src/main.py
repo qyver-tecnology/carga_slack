@@ -544,8 +544,9 @@ def process_all_sheets(sheets_url: str, site_name: str) -> Dict[str, int]:
                     total_receita_dolar = to_float(site_receita_dolar)
                     total_mc = to_float(site_mc)
                     
-                    # Calcula ROAS médio dos valores lidos da planilha
-                    roas_medio = sum(roas_lidos) / len(roas_lidos) if roas_lidos else 0.0
+                    # Calcula ROAS baseado no resumo total (mais preciso)
+                    total_receita = total_receita_real + total_receita_dolar
+                    roas_medio = total_receita / total_investimento if total_investimento > 0 else 0.0
                     
                     investimento_str = f"R$ {total_investimento:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
                     receita_real_str = f"R$ {total_receita_real:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
@@ -870,8 +871,9 @@ def main():
                 time.sleep(wait_between_sites)
 
             try:
-                # Calcula ROAS médio dos valores lidos da planilha
-                roas_medio = sum(roas_lidos) / len(roas_lidos) if roas_lidos else 0.0
+                # Calcula ROAS baseado no resumo total (mais preciso)
+                total_receita = total_receita_real + total_receita_dolar
+                roas_medio = total_receita / total_investimento if total_investimento > 0 else 0.0
                 
                 investimento_str = f"R$ {total_investimento:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
                 receita_real_str = f"R$ {total_receita_real:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
