@@ -62,6 +62,3 @@ tmp/
 # JSON test files
 test_site_*.json
 test_all_sites_*.json
-
-# Google Service Account
-google_service_account.json

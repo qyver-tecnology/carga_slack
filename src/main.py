@@ -299,19 +299,18 @@ def process_current_date_only(sheets_url: str, site_name: str) -> None:
             total_investimento = to_float(investimento)
             total_receita = to_float(receita)
             total_mc = to_float(mc_geral)
-            roas_site = total_receita / total_investimento if total_investimento > 0 else 0.0
-            roas_site_str = f"{roas_site:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
-            squad_name = config.get('squad_name')
-            # Calcula ROAS médio
-            roas_medio = total_receita / total_investimento if total_investimento > 0 else 0.0
-            roas_medio_str = f"{roas_medio:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            roas_geral_float = to_float(roas_geral)
+            
             investimento_str = f"R$ {total_investimento:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
             receita_str = f"R$ {total_receita:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            roas_str = f"{roas_geral_float:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            mc_str = f"R$ {total_mc:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            
             resumo_msg = [
                 f"Investimento: {investimento_str}",
                 f"Receita: {receita_str}",
-                f"ROAS: {roas_medio_str}",
-                f"MC: R$ {total_mc:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                f"ROAS: {roas_str}",
+                f"MC: {mc_str}"
             ]
             resumo_final = "\n".join(resumo_msg)
             send_to_slack(resumo_final, webhook_url)
@@ -544,21 +543,20 @@ def process_all_sheets(sheets_url: str, site_name: str) -> Dict[str, int]:
                     total_receita_real = to_float(site_receita_real)
                     total_receita_dolar = to_float(site_receita_dolar)
                     total_mc = to_float(site_mc)
-                    total_receita = total_receita_real + total_receita_dolar
-                    roas_medio = (total_receita_real + total_receita_dolar) / total_investimento if total_investimento > 0 else 0.0
-                    roas_medio_str = f"{roas_medio:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    
+                    # Calcula ROAS médio dos valores lidos da planilha
+                    roas_medio = sum(roas_lidos) / len(roas_lidos) if roas_lidos else 0.0
+                    
                     investimento_str = f"R$ {total_investimento:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
                     receita_real_str = f"R$ {total_receita_real:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
                     receita_dolar_str = f"$ {total_receita_dolar:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
                     mc_str = f"R$ {total_mc:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
-                    squad_name = config.get('squad_name')
-                    # Calcula ROAS médio
-                    roas_medio = (total_receita_real + total_receita_dolar) / total_investimento if total_investimento > 0 else 0.0
-                    roas_medio_str = f"{roas_medio:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    roas_str = f"{roas_medio:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    
                     resumo_msg = [
                         f"Investimento: {investimento_str}",
                         f"Receita: {receita_real_str}",
-                        f"ROAS: {roas_medio_str}",
+                        f"ROAS: {roas_str}",
                         f"MC: {mc_str}"
                     ]
                     resumo_final = "\n".join(resumo_msg)
@@ -872,21 +870,19 @@ def main():
                 time.sleep(wait_between_sites)
 
             try:
-                roas_medio = (total_receita_real + total_receita_dolar) / total_investimento if total_investimento > 0 else 0.0
-                roas_medio_str = f"{roas_medio:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                # Calcula ROAS médio dos valores lidos da planilha
+                roas_medio = sum(roas_lidos) / len(roas_lidos) if roas_lidos else 0.0
+                
                 investimento_str = f"R$ {total_investimento:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
                 receita_real_str = f"R$ {total_receita_real:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
                 receita_dolar_str = f"$ {total_receita_dolar:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
                 mc_str = f"R$ {total_mc:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
-                squad_name = config.get('squad_name')
-                # Calcula ROAS médio
-                roas_medio = (total_receita_real + total_receita_dolar) / total_investimento if total_investimento > 0 else 0.0
-                roas_medio_str = f"{roas_medio:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
-                investimento_str = f"R$ {total_investimento:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                roas_str = f"{roas_medio:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                
                 resumo_msg = [
                     f"Investimento: {investimento_str}",
                     f"Receita: {receita_real_str}",
-                    f"ROAS: {roas_medio_str}",
+                    f"ROAS: {roas_str}",
                     f"MC: {mc_str}"
                 ]
                 resumo_final = "\n".join(resumo_msg)
